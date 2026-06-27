@@ -1,6 +1,6 @@
 # BattleshipPythonProject
 
-Hello, Welcome to our Battleship Project!
+Hello, Welcome to my Battleship Project!
 
 How-To-Play:
 
