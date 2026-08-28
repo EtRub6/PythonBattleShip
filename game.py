@@ -1,4 +1,4 @@
-# Authors: Ethan Rubinstein, Nolan Duarte, Freddy Ngufy
+# Author: Ethan Rubinstein
 
 """
 game.py
@@ -23,6 +23,7 @@ from settings import (
     SHIP_SIZES,
 )
 
+from board import Board
 from player import Player
 from enemy import Enemy
 from renderer import Renderer
@@ -129,6 +130,32 @@ class Game:
         if play_button.collidepoint(mouse_x, mouse_y):
             self.sound_manager.play_sound("click")
             self.start_new_game()
+
+    def get_random_button_rect(self):
+        """
+        Get the rectangle for the "Randomize Ships" button shown
+        during the placement phase.
+
+        Returns:
+            pygame.Rect: Rectangle used for drawing and clicking the button.
+        """
+        x = ENEMY_OFFSET_X + BOARD_WIDTH + 20
+        return pygame.Rect(x, BOARD_OFFSET_Y, 150, 44)
+
+    def handle_randomize_click(self):
+        """
+        Instantly place the player's whole fleet randomly and jump
+        straight to the battle phase. Lets players skip manual
+        placement if they just want to play.
+        """
+        self.player.board = Board()
+        self.player.board.place_random_fleet()
+
+        self.current_ship_index = len(self.ship_sizes)
+        self.phase = "battle"
+        self.player_turn = True
+        self.message = "Fleet randomized. Battle started! Your turn."
+        self.sound_manager.play_sound("click")
 
     def get_menu_button_rect(self):
         """
@@ -248,9 +275,6 @@ class Game:
             self.sound_manager.play_music("Victory.mp3", loop=False)
             return
 
-
-
-
     def enemy_attack(self):
         """
         Perform the enemy's turn.
@@ -302,8 +326,6 @@ class Game:
             self.sound_manager.play_music("game_over.mp3", loop=False)
             return
 
-
-
     def handle_events(self):
         """
         Process all pygame events.
@@ -319,6 +341,10 @@ class Game:
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+
                 if self.phase == "placement" and event.key == pygame.K_r:
                     if self.orientation == "H":
                         self.orientation = "V"
@@ -334,7 +360,10 @@ class Game:
                     self.handle_menu_click(x, y)
 
                 elif self.phase == "placement":
-                    self.handle_placement_click(x, y)
+                    if self.get_random_button_rect().collidepoint(x, y):
+                        self.handle_randomize_click()
+                    else:
+                        self.handle_placement_click(x, y)
 
                 elif self.phase == "battle":
                     self.handle_player_attack(x, y)

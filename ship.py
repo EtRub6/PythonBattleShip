@@ -1,4 +1,4 @@
-# Authors: Ethan Rubinstein, Nolan Duarte, Freddy Ngufy
+# Author: Ethan Rubinstein
 
 """
 ship.py

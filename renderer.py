@@ -1,4 +1,4 @@
-# Authors: Ethan Rubinstein, Nolan Duarte, Freddy Ngufy
+# Author: Ethan Rubinstein
 
 """
 renderer.py
@@ -186,6 +186,69 @@ class Renderer:
                     2
                 )
 
+    def draw_random_button(self, game):
+        """
+        Draw the "Randomize Ships" button during the placement phase.
+
+        Args:
+            game (Game): The current game object.
+        """
+        if game.phase != "placement":
+            return
+
+        font = self.fonts["font"]
+        small_font = self.fonts["small_font"]
+
+        button = game.get_random_button_rect()
+
+        pygame.draw.rect(self.screen, GREEN, button)
+        pygame.draw.rect(self.screen, WHITE, button, 2)
+
+        text = font.render("Randomize", True, WHITE)
+        text_rect = text.get_rect(center=button.center)
+        self.screen.blit(text, text_rect)
+
+        hint = small_font.render("Auto-place & start", True, WHITE)
+        hint_rect = hint.get_rect(midtop=(button.centerx, button.bottom + 6))
+        self.screen.blit(hint, hint_rect)
+
+    def draw_hover_attack_highlight(self, game):
+        """
+        Highlight the enemy cell under the mouse during battle, so the
+        player can see exactly which square they are about to attack.
+
+        Args:
+            game (Game): The current game object.
+        """
+        if game.phase != "battle" or not game.player_turn:
+            return
+
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        board_left = ENEMY_OFFSET_X
+        board_right = ENEMY_OFFSET_X + BOARD_WIDTH
+        board_top = BOARD_OFFSET_Y
+        board_bottom = BOARD_OFFSET_Y + BOARD_HEIGHT
+
+        if not (board_left <= mouse_x < board_right and board_top <= mouse_y < board_bottom):
+            return
+
+        col = (mouse_x - ENEMY_OFFSET_X) // CELL_SIZE
+        row = (mouse_y - BOARD_OFFSET_Y) // CELL_SIZE
+
+        if (row, col) in game.enemy.board.attacked_cells:
+            return
+
+        x = ENEMY_OFFSET_X + col * CELL_SIZE
+        y = BOARD_OFFSET_Y + row * CELL_SIZE
+
+        pygame.draw.rect(
+            self.screen,
+            YELLOW,
+            (x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4),
+            2
+        )
+
     def draw_labels(self, game):
         """
         Draw board labels, instructions, and game messages.
@@ -274,7 +337,13 @@ class Renderer:
     def draw_ship_status(self, game):
         """
         Draw enemy fleet tracker on right side.
+
+        Only shown once the battle has started (or ended) — during
+        placement this space is used by the Randomize button instead.
         """
+        if game.phase not in ("battle", "game_over"):
+            return
+
         small_font = self.fonts["small_font"]
         x = ENEMY_OFFSET_X + BOARD_WIDTH + 20
         y = BOARD_OFFSET_Y
@@ -330,6 +399,8 @@ class Renderer:
         self.draw_ship_status(game)
 
         self.draw_hover_ship_preview(game)
+        self.draw_hover_attack_highlight(game)
+        self.draw_random_button(game)
 
         if game.phase == "game_over":
             self.draw_game_over_panel(game)

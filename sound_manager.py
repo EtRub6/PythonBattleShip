@@ -1,4 +1,4 @@
-# Authors: Ethan Rubinstein, Nolan Duarte, Freddy Ngufy
+# Author: Ethan Rubinstein
 
 
 """
@@ -21,7 +21,11 @@ class SoundManager:
         """
         Initialize the mixer and load sound effects.
         """
-        self.sound_folder = "sounds"
+        # Build the sounds folder path relative to this file, not the
+        # current working directory. This way the game finds its audio
+        # files no matter where it's launched from.
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.sound_folder = os.path.join(base_dir, "sounds")
 
         # Store which background song is currently playing.
         self.current_music = None
