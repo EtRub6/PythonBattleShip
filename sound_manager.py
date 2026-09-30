@@ -30,6 +30,10 @@ class SoundManager:
         # Store which background song is currently playing.
         self.current_music = None
 
+        # Mute state and normal music volume.
+        self.muted = False
+        self.music_volume = 0.3
+
         # Try to initialize pygame's sound system.
         # If sound fails, the game will still run.
         try:
@@ -90,13 +94,27 @@ class SoundManager:
         Args:
             sound_name (str): Name of the sound effect.
         """
-        if not self.sound_enabled:
+        if not self.sound_enabled or self.muted:
             return
 
         sound = self.sounds.get(sound_name)
 
         if sound is not None:
             sound.play()
+
+    def toggle_mute(self):
+        """
+        Mute or unmute all music and sound effects.
+        """
+        self.muted = not self.muted
+
+        if not self.sound_enabled:
+            return
+
+        if self.muted:
+            pygame.mixer.music.set_volume(0)
+        else:
+            pygame.mixer.music.set_volume(self.music_volume)
 
     def play_music(self, filename, loop=True):
         """
@@ -117,8 +135,11 @@ class SoundManager:
         try:
             pygame.mixer.music.load(path)
 
-            # Lower background music volume
-            pygame.mixer.music.set_volume(0.3)
+            # Use the normal music volume, or 0 if muted.
+            if self.muted:
+                pygame.mixer.music.set_volume(0)
+            else:
+                pygame.mixer.music.set_volume(self.music_volume)
 
             if loop:
                 pygame.mixer.music.play(-1)

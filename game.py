@@ -41,6 +41,7 @@ class Game:
         """
         pygame.init()
 
+        self.muted = False
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Battleship")
         self.clock = pygame.time.Clock()
@@ -341,6 +342,7 @@ class Game:
                 sys.exit()
 
             if event.type == pygame.KEYDOWN:
+
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
