@@ -343,6 +343,14 @@ class Game:
 
             if event.type == pygame.KEYDOWN:
 
+                if event.key == pygame.K_m:
+                    self.sound_manager.toggle_mute()
+
+                    if self.sound_manager.muted:
+                        self.message = "Sound muted. Press M to unmute."
+                    else:
+                        self.message = "Sound on."
+
                 if event.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
